@@ -4,7 +4,7 @@ chat_frame = [] # array to convert to dataframe
 txt_file = open("WhatsAppChatUTA.txt", 'r') # open the txt file exported for whatsapp group
 
 text = txt_file.readlines() # to read all the rows in the text file
-
+s
 for txt in text:
     text_value = txt.split("-")
     try:
