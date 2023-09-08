@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 chat_frame = [] # array to convert to dataframe
 txt_file = open("WhatsAppChatUTA.txt", 'r') # open the txt file exported for whatsapp group
 
@@ -35,4 +35,34 @@ df.to_csv("xlsxChat.csv", index=False)
 filtered_df = df[df['Message'].str.contains('accommodation', case=False)]
 filtered_df.to_csv("xlsxChat.csv", index=False)
 
-##STAGE 2c- Grouping Data as Temporary accomodation available/needed , Permanent accomodation available/needed
+##STAGE 2c- Grouping Data as Temporary accomodation and Permanent Accomodation along with contact details
+
+new_df = pd.DataFrame(columns=['PhoneNumber', 'Temporary', 'permanent'])
+permList = []
+tempList = []
+phoneNumber_Temp = []
+phoneNumber_Perm = []
+for index, value in filtered_df.iterrows():
+    if 'temporary' not in value['Message'].lower():
+        permList.append(value['Message'])
+        phoneNumber_Perm.append(value['PhoneNumber'])
+    elif ('temporary' and 'permanent') in value['Message'].lower():
+        tempList.append(value['Message'])
+        phoneNumber_Temp.append(value['PhoneNumber'])
+        permList.append(value['Message'])
+        phoneNumber_Perm.append(value['PhoneNumber'])
+    else:
+        tempList.append(value['Message'])
+        phoneNumber_Temp.append(value['PhoneNumber'])
+
+
+df_temp = pd.DataFrame({'Temporary': tempList})
+#df_temp.to_csv("xlsxChat.csv", index=False)
+df_perm = pd.DataFrame({'Permanent': permList})
+phoneNumberTemp = pd.DataFrame({'PhoneNumber-Temporary': phoneNumber_Temp})
+phoneNumberPerm = pd.DataFrame({'PhoneNumber-Permanent': phoneNumber_Perm})
+result = pd.concat([phoneNumberTemp,df_temp,phoneNumberPerm, df_perm], axis=1)
+
+result.to_csv("xlsxChat.csv", index=False)
+
+
