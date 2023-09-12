@@ -28,39 +28,68 @@ df = df[~(df['Message'].str.contains('joined') | df['Message'].str.contains('lef
         df['Message'].str.contains('added') | df['Message'].str.contains('This message was deleted')|
         df['Message'].str.contains('added')|df['Message'].str.contains('null')|df['Message'].str.contains('Media omitted')|
         df['Message'].str.contains('changed') | df['PhoneNumber'].str.contains('changed'))] ##Removing rows with redundant data
-df.to_csv("xlsxChat.csv", index=False)
+#df.to_csv("xlsxChat.csv", index=False)
 
 ##STAGE 2a - Bring out the accomodation related messages alone based on patterns
 
 filtered_df = df[df['Message'].str.contains('accommodation', case=False)]
 filtered_df.to_csv("xlsxChat.csv", index=False)
 
-##STAGE 2c- Grouping Data as Temporary accomodation and Permanent Accomodation along with contact details
+##STAGE 2c- Grouping Data as Temporary accomodation and Permanent Accomodation needed/available along with contact details
 
 new_df = pd.DataFrame(columns=['PhoneNumber', 'Temporary', 'permanent'])
-permList = []
-tempList = []
-phoneNumber_Temp = []
-phoneNumber_Perm = []
+
+phoneNumber_TempAvail = []
+phoneNumber_TempNeed = []
+phoneNumber_PermAvail = []
+phoneNumber_PermNeed = []
+permAvail =[]
+permNeed =[]
+tempAvail = []
+tempNeed =[]
 for index, value in filtered_df.iterrows():
     if 'temporary' not in value['Message'].lower():
-        permList.append(value['Message'])
-        phoneNumber_Perm.append(value['PhoneNumber'])
+        if 'available' in value['Message'].lower():
+            permAvail.append(value['Message'])
+            phoneNumber_PermAvail.append(value['PhoneNumber'])
+        else:
+            permNeed.append(value['Message'])
+            phoneNumber_PermNeed.append(value['PhoneNumber'])
+    elif all(word in value['Message'].lower() for word in ['temporary', 'permanent', 'available']):
+        tempAvail.append(value['Message'])
+        phoneNumber_TempAvail.append(value['PhoneNumber'])
+        permAvail.append(value['Message'])
+        phoneNumber_PermAvail.append(value['PhoneNumber'])
     elif ('temporary' and 'permanent') in value['Message'].lower():
-        tempList.append(value['Message'])
-        phoneNumber_Temp.append(value['PhoneNumber'])
-        permList.append(value['Message'])
-        phoneNumber_Perm.append(value['PhoneNumber'])
+        tempNeed.append(value['Message'])
+        phoneNumber_TempNeed.append(value['PhoneNumber'])
+        permNeed.append(value['Message'])
+        phoneNumber_PermNeed.append(value['PhoneNumber'])
     else:
-        tempList.append(value['Message'])
-        phoneNumber_Temp.append(value['PhoneNumber'])
+        if 'available' in value['Message'].lower():
+            tempAvail.append(value['Message'])
+            phoneNumber_TempAvail.append(value['PhoneNumber'])
+        else:
+            tempNeed.append(value['Message'])
+            phoneNumber_TempNeed.append(value['PhoneNumber'])
 
-df_temp = pd.DataFrame({'Temporary': tempList})
-df_perm = pd.DataFrame({'Permanent': permList})
-phoneNumberTemp = pd.DataFrame({'PhoneNumber-Temporary': phoneNumber_Temp})
-phoneNumberPerm = pd.DataFrame({'PhoneNumber-Permanent': phoneNumber_Perm})
-result = pd.concat([phoneNumberTemp,df_temp,phoneNumberPerm, df_perm], axis=1)
-result.to_csv('xlsxChat.csv')
+df_tempAvail = pd.DataFrame({'Temporary-Available': tempAvail})
+df_tempNeed = pd.DataFrame({'Temporary-Needed': tempNeed})
+df_permAvail = pd.DataFrame({'Permanent-Available': permAvail})
+df_permNeed = pd.DataFrame({'Permanent-Needed': permNeed})
+phNoTempAvail = pd.DataFrame({'PhoneNumber-Temporary': phoneNumber_TempAvail})
+phNoTempNeed = pd.DataFrame({'PhoneNumber-Temporary': phoneNumber_TempNeed})
+phNoPermAvail = pd.DataFrame({'PhoneNumber-Permanent': phoneNumber_PermAvail})
+phNoPermNeed = pd.DataFrame({'PhoneNumber-Permanent': phoneNumber_PermNeed})
+perm = pd.concat([phNoPermNeed, df_permNeed, phNoPermAvail, df_permAvail ], axis=1)
+temp = pd.concat([phNoTempNeed,df_tempNeed,phNoTempAvail,df_tempAvail ], axis=1)
+perm.to_csv('xlsxChatPerm.csv')
+temp.to_csv('xlsxChatTemp.csv')
+
+
+
+
+
 
 
 
