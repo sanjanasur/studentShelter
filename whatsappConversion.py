@@ -55,14 +55,18 @@ for index, value in filtered_df.iterrows():
         tempList.append(value['Message'])
         phoneNumber_Temp.append(value['PhoneNumber'])
 
-
 df_temp = pd.DataFrame({'Temporary': tempList})
-#df_temp.to_csv("xlsxChat.csv", index=False)
 df_perm = pd.DataFrame({'Permanent': permList})
 phoneNumberTemp = pd.DataFrame({'PhoneNumber-Temporary': phoneNumber_Temp})
 phoneNumberPerm = pd.DataFrame({'PhoneNumber-Permanent': phoneNumber_Perm})
 result = pd.concat([phoneNumberTemp,df_temp,phoneNumberPerm, df_perm], axis=1)
+result.to_csv('xlsxChat.csv')
 
-result.to_csv("xlsxChat.csv", index=False)
+
+
+
+
+
+
 
 
