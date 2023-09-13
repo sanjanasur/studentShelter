@@ -65,14 +65,15 @@ df = pd.DataFrame(chat_frame, columns=['PhoneNumber', 'Message'])
 # result.to_csv('xlsxChat.csv')
 
 #
-new_df = pd.DataFrame(columns=['PhoneNumber', 'Temporary', 'Permanent'])
+new_df = pd.DataFrame(columns=['PhoneNumber', 'Temporary', 'Permanent', 'Male'])
 for index, value in df.iterrows():
     print('**********', value['Message'])
     if 'accommodation' in value['Message']:
-        # new_df['PhoneNumber'] = value['PhoneNumber']
+        # new_ df['PhoneNumber'] = value['PhoneNumber']
         phone = value['PhoneNumber']
         permanent_value = ''
         temp_value = ''
+        male = ''
         if 'permanent' in value['Message'].lower():
             # print('entered poermanent', ['Message'])
             # new_df['permanent'] = df['Message']
@@ -80,15 +81,27 @@ for index, value in df.iterrows():
         elif 'temporary' in value['Message'].lower():
             # new_df['Temporary'] = df['Message']
             temp_value = value['Message']
+        elif ('guy' in value['Message'].lower() or 'guys' in value['Message'].lower() or
+              'boy' in value['Message'].lower() or 'boys' in value['Message'].lower() or
+              'male' in value['Message'].lower() or 'males' in value['Message'].lower()):
+            male = value['Message']
         else:
             # new_df['permanent'] = None
             # new_df['Temporary'] = None
             permanent_value = None
             temp_value = None
+            male = None
         if permanent_value is not None and temp_value is not None:
-            new_df = new_df._append({'PhoneNumber': phone, 'Temporary': temp_value, 'Permanent': permanent_value}, ignore_index = True)
+            new_df = new_df._append({'PhoneNumber': phone, 'Temporary': temp_value, 'Permanent': permanent_value
+                                    ,'Male': male}, ignore_index = True)
 
-new_df.to_csv('new_df.csv')
+new_df.sort_values('PhoneNumber', ascending=True, inplace=True)
+new_df.to_csv('new_df.csv', index=False)
+# grouped_df = new_df.groupby(by='PhoneNumber')
+# grouped_df.agg(['count', 'sum'])
+# print('##################',new_df.describe())
+# print('000000000000000000000',new_df.PhoneNumber.value_counts())
+# print('99999999999999999999999', grouped_df.agg(['count', 'sum']))
 
 
 
