@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 import numpy as np
 chat_frame = [] # array to convert to dataframe
 txt_file = open("WhatsAppChatUTA.txt", 'r') # open the txt file exported for whatsapp group
@@ -36,55 +37,122 @@ filtered_df = df[df['Message'].str.contains('accommodation', case=False)]
 filtered_df.to_csv("xlsxChat.csv", index=False)
 
 ##STAGE 2c- Grouping Data as Temporary accomodation and Permanent Accomodation needed/available along with contact details
-
+##Stage 2c-ii - Added columns by parsing through message
+#NOTE: skipping temporary acc processing for first stage of project
 new_df = pd.DataFrame(columns=['PhoneNumber', 'Temporary', 'permanent'])
 
-phoneNumber_TempAvail = []
-phoneNumber_TempNeed = []
 phoneNumber_PermAvail = []
 phoneNumber_PermNeed = []
-permAvail =[]
-permNeed =[]
-tempAvail = []
-tempNeed =[]
+gender_avail=[]
+gender_need=[]
+noAvail = []
+noNeed = []
+
 for index, value in filtered_df.iterrows():
     if 'temporary' not in value['Message'].lower():
         if 'available' in value['Message'].lower():
-            permAvail.append(value['Message'])
-            phoneNumber_PermAvail.append(value['PhoneNumber'])
-        else:
-            permNeed.append(value['Message'])
-            phoneNumber_PermNeed.append(value['PhoneNumber'])
-    elif all(word in value['Message'].lower() for word in ['temporary', 'permanent', 'available']):
-        tempAvail.append(value['Message'])
-        phoneNumber_TempAvail.append(value['PhoneNumber'])
-        permAvail.append(value['Message'])
-        phoneNumber_PermAvail.append(value['PhoneNumber'])
-    elif ('temporary' and 'permanent') in value['Message'].lower():
-        tempNeed.append(value['Message'])
-        phoneNumber_TempNeed.append(value['PhoneNumber'])
-        permNeed.append(value['Message'])
-        phoneNumber_PermNeed.append(value['PhoneNumber'])
-    else:
-        if 'available' in value['Message'].lower():
-            tempAvail.append(value['Message'])
-            phoneNumber_TempAvail.append(value['PhoneNumber'])
-        else:
-            tempNeed.append(value['Message'])
-            phoneNumber_TempNeed.append(value['PhoneNumber'])
+            for val in ['boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females', 'guy', 'guys']:
+                if val in value['Message'].lower():
+                    gender_avail.append(val)
+                    phoneNumber_PermAvail.append(value['PhoneNumber'])
+            pattern = r'(\d+)\s*(girl|girls|boy|boys|male|males|female|females|guy|guys)'
 
-df_tempAvail = pd.DataFrame({'Temporary-Available': tempAvail})
-df_tempNeed = pd.DataFrame({'Temporary-Needed': tempNeed})
-df_permAvail = pd.DataFrame({'Permanent-Available': permAvail})
-df_permNeed = pd.DataFrame({'Permanent-Needed': permNeed})
-phNoTempAvail = pd.DataFrame({'PhoneNumber-Temporary': phoneNumber_TempAvail})
-phNoTempNeed = pd.DataFrame({'PhoneNumber-Temporary': phoneNumber_TempNeed})
-phNoPermAvail = pd.DataFrame({'PhoneNumber-Permanent': phoneNumber_PermAvail})
-phNoPermNeed = pd.DataFrame({'PhoneNumber-Permanent': phoneNumber_PermNeed})
-perm = pd.concat([phNoPermNeed, df_permNeed, phNoPermAvail, df_permAvail ], axis=1)
-temp = pd.concat([phNoTempNeed,df_tempNeed,phNoTempAvail,df_tempAvail ], axis=1)
-perm.to_csv('xlsxChatPerm.csv')
-temp.to_csv('xlsxChatTemp.csv')
+            # Use re.findall to find all matches in the string
+            matches = re.findall(pattern, value['Message'])
+
+            # Initialize a variable to store the total number of girls
+            total = 0
+
+            # Iterate through the matches and add up the number of girls
+            for match in matches:
+                number, _ = match
+                total += int(number)
+            noAvail.append(total)
+
+        else:
+            for val in ['boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females', 'guy', 'guys']:
+                if val in value['Message'].lower():
+                    gender_need.append(val)
+                    phoneNumber_PermNeed.append(value['PhoneNumber'])
+            pattern = r'(\d+)\s*(girl|girls|boy|boys|male|males|female|females|guy|guys)'
+
+            # Use re.findall to find all matches in the string
+            matches = re.findall(pattern, value['Message'])
+
+            # Initialize a variable to store the total number of girls
+            total = 0
+
+            # Iterate through the matches and add up the number of girls
+            for match in matches:
+                number, _ = match
+                total += int(number)
+            noNeed.append(total)
+
+    elif all(word in value['Message'].lower() for word in ['temporary', 'permanent', 'available']):
+        for val in ['boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females', 'guy', 'guys']:
+            if val in value['Message'].lower():
+                gender_avail.append(val)
+                phoneNumber_PermAvail.append(value['PhoneNumber'])
+        pattern = r'(\d+)\s*(girl|girls|boy|boys|male|males|female|females|guy|guys)'
+
+        # Use re.findall to find all matches in the string
+        matches = re.findall(pattern, value['Message'])
+
+        # Initialize a variable to store the total number of girls
+        total = 0
+
+        # Iterate through the matches and add up the number of girls
+        for match in matches:
+            number, _ = match
+            total += int(number)
+        noAvail.append(total)
+    elif ('temporary' and 'permanent') in value['Message'].lower():
+        for val in ['boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females', 'guy', 'guys']:
+            if val in value['Message'].lower():
+                gender_need.append(val)
+                phoneNumber_PermNeed.append(value['PhoneNumber'])
+        pattern = r'(\d+)\s*(girl|girls|boy|boys|male|males|female|females|guy|guys)'
+
+        # Use re.findall to find all matches in the string
+        matches = re.findall(pattern, value['Message'])
+
+        # Initialize a variable to store the total number of girls
+        total = 0
+
+        # Iterate through the matches and add up the number of girls
+        for match in matches:
+            number, _ = match
+            total += int(number)
+        noNeed.append(total)
+
+
+df_phAvail = pd.DataFrame({'PhNumber-Available': phoneNumber_PermAvail})
+df_genAvail = pd.DataFrame({'GenderAvail': gender_avail})
+df_noAvail = pd.DataFrame({'no': noAvail})
+df_noAvail.loc[df_noAvail['no'] == 0, 'no'] = 1   #ADD CONDITION FOR EMPTY CELLS ALSO AS DEFAULT 1
+
+df_phNeed = pd.DataFrame({'PhNumber-Needed': phoneNumber_PermNeed})
+df_genNeed = pd.DataFrame({'GenderNeed': gender_need})
+df_noNeed = pd.DataFrame({'no': noNeed})
+df_noNeed.loc[df_noNeed['no'] == 0, 'no'] = 1    #ADD CONDITION FOR EMPTY CELLS ALSO AS DEFAULT 1
+
+df_permAvail = pd.concat([df_phAvail , df_genAvail,df_noAvail], axis=1)
+df_permNeed = pd.concat([df_phNeed , df_genNeed,df_noNeed], axis=1)
+
+df_permAvail.to_csv("permAvail.csv", index=False)
+
+df_permNeed.to_csv("permNeed.csv", index=False)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
