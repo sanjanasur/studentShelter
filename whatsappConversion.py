@@ -45,30 +45,38 @@ phoneNumber_PermAvail = []
 phoneNumber_PermNeed = []
 gender_avail=[]
 gender_need=[]
-noAvail = []
-noNeed = []
-rentAvail =[]
+rentAvail = []
 rentNeed = []
+noAvail =[]
+noNeed = []
+
+#Function to calculate number of spaces available
+def calculateSpaces(Message):
+
+    # Use regular expression to find the three words before
+    pattern = r'(\S+\s+){3}(girl|girls|boy|boys|male|males|female|females|guy|guys)'
+    match = re.search(pattern, Message)
+
+    if match:
+        words_before= match.group(0)
+        for word in (words_before.strip().split()):
+            if word in ['one', 'two', 'three', 'four', 'five','1','2','3','4','5']:
+
+             return word
+
 for index, value in filtered_df.iterrows():
     if 'temporary' not in value['Message'].lower():
-        if 'available' in value['Message'].lower():
-            for val in ['boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females', 'guy', 'guys']:
-                if val in value['Message'].lower():
+        if 'available' or 'having' in value['Message'].lower():
+            for val in value['Message'].split():
+                if val.lower() in [('girl' and 'boy'), 'boy', 'boys', 'girl', 'girls', 'male', 'males', 'female','females', 'guy', 'guys']:
+
                     gender_avail.append(val)
                     phoneNumber_PermAvail.append(value['PhoneNumber'])
-                    pattern = r'(\d+)\s*(girl|girls|boy|boys|male|males|female|females|guy|guys)'
 
-                    # Use re.findall to find all matches in the string
-                    matches = re.findall(pattern, value['Message'])
-
-            # Initialize a variable to store the total number of girls
-                    total = 0
-
-            # Iterate through the matches and add up the number of girls
-                    for match in matches:
-                        number, _ = match
-                        total += int(number)
-                    noAvail.append(total)
+                    if calculateSpaces(value['Message'].lower()) == None:
+                        noAvail.append("one")
+                    else:
+                        noAvail.append(calculateSpaces(value['Message'].lower()))
                     pattern1 = r'\$(\d+)'
                     match1 = re.search(pattern1, value['Message'])
                     pattern2 = r'(\d+)\$'
@@ -82,23 +90,15 @@ for index, value in filtered_df.iterrows():
                     else:
                         rentAvail.append("350")
         else:
-            for val in ['boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females', 'guy', 'guys']:
-                if val in value['Message'].lower():
+            for val in value['Message'].split():
+                if val.lower() in [('girl' and 'boy'), 'boy', 'boys', 'girl', 'girls', 'male', 'males', 'female','females', 'guy', 'guys']:
                     gender_need.append(val)
                     phoneNumber_PermNeed.append(value['PhoneNumber'])
-                    pattern = r'(\d+)\s*(girl|girls|boy|boys|male|males|female|females|guy|guys)'
 
-                    # Use re.findall to find all matches in the string
-                    matches = re.findall(pattern, value['Message'])
-
-                    # Initialize a variable to store the total number of girls
-                    total = 0
-
-                    # Iterate through the matches and add up the number of girls
-                    for match in matches:
-                       number, _ = match
-                       total += int(number)
-                    noNeed.append(total)
+                    if calculateSpaces(value['Message'].lower()) == None:
+                        noNeed.append("one")
+                    else:
+                        noNeed.append(calculateSpaces(value['Message'].lower()))
                     pattern1 = r'\$(\d+)'
                     match1 = re.search(pattern1, value['Message'])
                     pattern2 = r'(\d+)\$'
@@ -112,23 +112,14 @@ for index, value in filtered_df.iterrows():
                     else:
                         rentNeed.append("350")
     elif all(word in value['Message'].lower() for word in ['temporary', 'permanent', 'available']):
-        for val in ['boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females', 'guy', 'guys']:
-            if val in value['Message'].lower():
+        for val in value['Message'].split():
+            if val.lower() in [('girl' and 'boy'), 'boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females','guy', 'guys']:
                 gender_avail.append(val)
                 phoneNumber_PermAvail.append(value['PhoneNumber'])
-                pattern = r'(\d+)\s*(girl|girls|boy|boys|male|males|female|females|guy|guys)'
-
-                # Use re.findall to find all matches in the string
-                matches = re.findall(pattern, value['Message'])
-
-                # Initialize a variable to store the total number of girls
-                total = 0
-
-             # Iterate through the matches and add up the number of girls
-                for match in matches:
-                  number, _ = match
-                  total += int(number)
-                noAvail.append(total)
+                if calculateSpaces(value['Message'].lower()) == None:
+                    noAvail.append("one")
+                else:
+                    noAvail.append(calculateSpaces(value['Message'].lower()))
                 pattern1 = r'\$(\d+)'
                 match1 = re.search(pattern1, value['Message'])
                 pattern2 = r'(\d+)\$'
@@ -143,21 +134,14 @@ for index, value in filtered_df.iterrows():
                     rentAvail.append("350")
 
     elif ('temporary' and 'permanent') in value['Message'].lower():
-        for val in ['boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females', 'guy', 'guys']:
-            if val in value['Message'].lower():
+        for val in value['Message'].split():
+            if val.lower() in [('girl' and 'boy'), 'boy', 'boys', 'girl', 'girls', 'male', 'males', 'female', 'females','guy', 'guys']:
                 gender_need.append(val)
                 phoneNumber_PermNeed.append(value['PhoneNumber'])
-                pattern = r'(\d+)\s*(girl|girls|boy|boys|male|males|female|females|guy|guys)'
-
-                # Use re.findall to find all matches in the string
-                matches = re.findall(pattern, value['Message'])
-                # Initialize a variable to store the total number of girls
-                total = 0
-                # Iterate through the matches and add up the number of girls
-                for match in matches:
-                    number, _ = match
-                    total += int(number)
-                noNeed.append(total)
+                if calculateSpaces(value['Message'].lower()) == None:
+                    noNeed.append("one")
+                else:
+                    noNeed.append(calculateSpaces(value['Message'].lower()))
                 pattern1 = r'\$(\d+)'
                 match1 = re.search(pattern1, value['Message'])
                 pattern2 = r'(\d+)\$'
